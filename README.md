@@ -1,4 +1,4 @@
-# Téléprompteur (HTML/JS)
+# Téléprompteur (HTML/JS) https://eal49.github.io/BatraPrompt/
 
 Une application web simple de téléprompteur. Collez votre texte, choisissez une vitesse en mots/seconde, puis faites défiler le texte automatiquement. Vous pouvez aussi générer une page autonome « lecture seule » à partager ou utiliser pour la présentation.
 
@@ -52,3 +52,4 @@ Testé sur les dernières versions de Chrome/Edge/Firefox. Si vous rencontrez un
 
 ## Licence
 Libre d'utilisation dans un contexte personnel ou de démonstration.
+
