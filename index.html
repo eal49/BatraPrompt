@@ -3,78 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teleprompter</title>
+    <title>BatraPrompt</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <meta name="color-scheme" content="light dark">
-    <meta name="description" content="Simple browser teleprompter - paste text, set speed, scroll.">
+    <meta name="description" content="Teleprompter generator and viewer">
 </head>
 <body>
-    <div class="app">
-        <header class="app__header">
-            <h1 class="app__title"><span class="brand">🐸 BatraPrompt</span> <span class="tagline">— Téléprompteur </span></h1>
-        </header>
-
-        <main class="app__main">
-            <section class="controls" aria-label="Teleprompter Controls">
-                <div class="field">
-                    <label for="inputText">Text</label>
-                    <textarea id="inputText" rows="6" placeholder="Paste or type your script here..."></textarea>
-                </div>
-
-                <div class="grid">
-                    <div class="field">
-                        <label for="speedInput">Speed (words/sec)</label>
-                        <div class="inline">
-                            <input id="speedInput" type="number" min="0.5" max="10" step="0.1" value="3" />
-                            <input id="speedRange" type="range" min="0.5" max="10" step="0.1" value="3" />
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="fontSizeInput">Font size (px)</label>
-                        <div class="inline">
-                            <input id="fontSizeInput" type="number" min="12" max="96" step="1" value="28" />
-                            <input id="fontSizeRange" type="range" min="12" max="96" step="1" value="28" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid">
-                    <div class="field">
-                        <label class="checkbox">
-                            <input id="fadeEdgesToggle" type="checkbox" checked />
-                            <span>Fade top/bottom edges</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="buttons">
-                    <button id="startBtn" class="btn btn--primary">Start</button>
-                    <button id="pauseBtn" class="btn" disabled>Pause</button>
-                    <button id="resetBtn" class="btn" disabled>Reset</button>
-                    <button id="generateBtn" class="btn">Generate</button>
-                </div>
-            </section>
-
-            <section class="stage" aria-label="Teleprompter Stage">
-                <div id="stageContainer" class="stage__viewport">
-                    <div id="stageMaskTop" class="stage__mask stage__mask--top" aria-hidden="true"></div>
-                    <div id="stageMaskBottom" class="stage__mask stage__mask--bottom" aria-hidden="true"></div>
-                    <div id="prompt" class="prompt">
-                        <div id="promptContent" class="prompt__content"></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer class="app__footer">
-            <small>Built for a simple, local teleprompter workflow.</small>
-        </footer>
+    <div class="landing">
+        <div class="landing__center">
+            <h1 class="landing__title">🐸 BatraPrompt</h1>
+            <p class="landing__subtitle">Teleprompter generator and viewer</p>
+            <div class="landing__actions">
+                <a class="btn btn--primary" href="generator.html">Open Generator</a>
+                <a class="btn" id="browseBtn" href="#">Browse Generated</a>
+            </div>
+        </div>
+        <div class="landing__list" id="landingList" aria-live="polite"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+    (function(){
+        const list = document.getElementById('landingList');
+        const browseBtn = document.getElementById('browseBtn');
+
+        function ownerRepoFromUrl(){
+            // Works for user or project pages: https://<user>.github.io/<repo>/
+            const host = location.host; // <user>.github.io
+            const user = host.split('.')[0];
+            const pathParts = location.pathname.split('/').filter(Boolean);
+            const repo = pathParts[0] || '';
+            return { user, repo };
+        }
+
+        async function fetchHtmlFiles(){
+            const { user, repo } = ownerRepoFromUrl();
+            if (!user) return [];
+            try {
+                const api = repo
+                    ? `https://api.github.com/repos/${user}/${repo}/contents/`
+                    : `https://api.github.com/repos/${user}/${user}.github.io/contents/`;
+                const resp = await fetch(api);
+                if (!resp.ok) return [];
+                const data = await resp.json();
+                return (Array.isArray(data) ? data : [])
+                    .filter(it => /\.html$/i.test(it.name) && it.name !== 'index.html' && it.name !== 'generator.html')
+                    .map(it => ({ name: it.name, path: it.path }));
+            } catch { return []; }
+        }
+
+        function render(files){
+            if (!list) return;
+            if (!files.length){
+                list.innerHTML = '<p class="landing__empty">No generated pages found.</p>';
+                return;
+            }
+            list.innerHTML = files.map(f => `<a class=\"landing__item\" href=\"${encodeURI(f.name)}\">${f.name}</a>`).join('');
+        }
+
+        async function browse(){
+            const files = await fetchHtmlFiles();
+            render(files);
+        }
+
+        if (browseBtn) browseBtn.addEventListener('click', (e)=>{ e.preventDefault(); browse(); });
+        // Auto-browse on load
+        browse();
+    })();
+    </script>
 </body>
 </html>
 
