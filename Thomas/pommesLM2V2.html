@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:55px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">
+
+Junon donne l’idée à Eurysthée du dixième travail.
+- J’ai un jardin avec un beau pommier, il est gardé par un serpent avec cent yeux et il est entouré d’un mur. Les filles d’Atlas, les Hespérides, surveillent le pommier. Demande à Hercule de te ramener trois pommes. Personne ne sait où est ce jardin.
+Hercule part, il demande son chemin à tout le monde, mais personne ne peut l’aider. Après un long voyage, il est arrivé au Caucase. Là, il voit un géant enchaîné à un rocher, un aigle lui déchire le foie chaque jour.
+- Je m’appelle Prométhée, j’ai volé un rayon au Soleil pour offrir le feu aux humains. Jupiter m’a puni pour cela.
+- Jupiter est mon père, si tu m’aides à trouver le jardin de Junon, je lui demanderait de te délivrer de ton fardeau.
+- Ce jardin est surveillé par les Hespérides, ce sont mes nièces car je suis le frère d’Atlas. Va le voir, lui aussi a été puni par Jupiter, il doit porter la Terre sur ses épaules. Si tu le remplaces un peu, il ira voir ses filles, elles ne pourront pas lui refuser les pommes.
+Hercule marche longtemps et arrive au mont Atlas, du sommet il voit le jardin, les Hespérides, le mur et le serpent. Hercule tire une flèche et tue le serpent. Puis, il rencontre Atlas, il lui demande de ramener trois pommes du jardin, en échange il portera la Terre quelques minutes. Atlas accepte, même Hercule chancèle sous le poids. Atlas est allé chercher les pommes. Il revient, tenant les trois pommes d’or dans sa main. Mais il n’avait plus envie de reprendre la Terre. .
+Mais Hercule est rusé : il lui demande de reprendre la Terre juste une minute, le temps de prendre un cousin à mettre sur ses épaules. Atlas accepte et Hercule prend les pommes et part en courant.
+Sur le chemin du retour, il repasse par le Caucase pour tuer l’aigle d’une flèche et libérer Prométhée. Puis il rentre chez lui et donne les pommes d’or à Eurysthée.</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.3};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+  })();
+  </script>
+</body>
+</html>
