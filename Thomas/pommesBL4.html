@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:65px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">
+
+C’est Junon qui souffla à Eurysthée l'idée du dixième des travaux d'Hercule.
+- Je possède un jardin merveilleux, dit-elle à Eurysthée. Son plus bel arbre est un pommier d'or.
+Les Hespérides, filles d'Atlas, le cultivent, un mur l'entoure, un serpent avec cent yeux le garde... C'est dire s'il est bien protégé! De plus il se trouve très loin à l'ouest, au-delà des montagnes d'Afrique, au bord de l'Océan, dans une région inconnue des hommes. Demande donc à Hercule de te rapporter trois pommes d'or du jardin des Hespérides. Mais surtout ne lui dis pas où il se trouve. Hercule partit donc à la recherche du jardin merveilleux. Mais personne ne savait où il se situait. Il se dirigea d'abord vers l'est, parcourut de nombreux pays et parvint au pied du Caucase.
+Là, il vit, enchaîné à un rocher, un grand homme, qu'un aigle attaquait. L'oiseau lui faisait au côté une affreuse blessure, lui dévorait le foie et s'envolait. Dès que le foie repoussait et que la plaie se refermait, l'aigle revenait et recommençait. Hercule s'approcha.
+- Qui es-tu? demanda-t-il à l'inconnu. Qu'as-tu fait pour mériter un tel supplice ?
+- Je suis Prométhée, un géant qui a volé un rayon au Soleil et j'ai donné le feu aux hommes. Jupiter m'a puni. Peut-être, un jour, me pardonnera-t-il…
+- Je le lui demanderai. Jupiter est mon père.
+- Et toi, tu es Hercule ! Je peux lire dans tes pensées : tu cherches le jardin des Hespérides. Je sais où il se trouve, tout à l'ouest, au bord de l'Océan. Les Hespérides sont mes nièces, les filles de mon frère Atlas. Lui aussi a été condamné par les dieux: il porte sur ses épaules la Terre ! Va le voir, propose-lui de prendre sa place un instant ; il ira chercher pour toi les trois pommes d'or.
+- Merci, Prométhée. Dès que j'aurai ces pommes, je reviendrai te délivrer.
+Hercule alla aussitôt vers l'ouest, il gravit le mont Atlas et, de là-haut, découvrit le merveilleux jardin. Il vit aussi les Hespérides qui cultivaient le pommier, le mur qui entourait l’arbre et le serpent aux cent yeux devant la porte.
+Suivant les conseils de Prométhée, Hercule alla saluer Atlas et lui proposa de porter la Terre à sa place, à condition d'avoir trois pommes du jardin. Atlas accepta, trop heureux de se libérer de son fardeau. Ses filles, les Hespérides, lui donneraient sans hésiter les fruits d'or, mais comment se débarrasser de l'énorme serpent, dont les cent yeux guettaient partout ?
+Une fois de plus, Hercule visa la bête avec son arc par-dessus le mur du jardin, la toucha en plein cœur, et les cent yeux se fermèrent pour toujours. Alors Atlas s'en alla vers le jardin tandis que le héros, malgré sa force, chancelait sous le poids de la Terre, de grosses gouttes de sueur lui coulaient sur le front.
+Atlas, sans se presser, revenait avec les trois pommes. Il réfléchissait: « Et si je laissais Hercule porter la Terre à ma place? C'est si agréable de se sentir léger et libre ! »
+- Hercule! J'ai une proposition à te faire: garde la Terre encore un moment, et moi, j'irai porter les fruits à Eurysthée.
+- D’accord, dit-il à Atlas. Mais ce serait plus confortable si je posais un coussin sur mes épaules, je vais en chercher un, reprends la Terre une minute.
+Sans se méfier, Atlas obéit. Aussitôt Hercule prit les pommes, cria: « Merci, Atlas ! A la prochaine fois ! » et partit en courant vers la Grèce. Cependant il n'oublia pas sa promesse à Prométhée, il tua d'une flèche l'aigle féroce. 
+Enfin Hercule revint à Tirynthe donner les pommes d'or à Eurysthée, qui les lui avait demandées.</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:3};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+  })();
+  </script>
+</body>
+</html>
