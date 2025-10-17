@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:65px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">
+
+Dans quelle partie du monde puis-je envoyer Hercule ? se demandait Eurysthée. Il a parcouru toutes les terres connues... Il ne reste que les Enfers. C'est ma dernière chance de me débarrasser de lui. Dans le monde souterrain, les monstres ne manquent pas... »
+- Hercule ! Va capturer Cerbère, le gardien des Enfers, le chien à trois tête... Amène-le-mol ici. Vivant.
+Ce fut le dernier et le plus pénible des travaux d'Hercule. Cerbère était un monstre redouté des morts et des vivants, c’était le frère de l'hydre de Lerne. Mais ce qui préoccupait Hercule, ce n'était pas la capture de Cerbère mais le fait d'entrer, lui vivant, en Enfers, le sombre royaume du dieu Pluton et de la douce Proserpine, son épouse.
+Hercule supplia Jupiter de l'aider.
+- Ne crains rien, mon fils, dit le maître des dieux; tu devras te débrouiller seul mais Proserpine est ta sœur, elle t’aidera sûrement. Je sais que tu en es capable.
+Hercule marcha jusqu’à une haute falaise avec de nombreuses grottes ; l'une d'elles menait aux Enfers. Le héros s'avança, seul.
+Il marcha longtemps dans un couloir sombre, puis il vit devant lui l'eau noire d'un fleuve  une barque.
+« Je comprends, se dit-il. Ce fleuve, c'est le Styx ; il entoure les Enfers, et voici Charon, il accueille les morts. »
+Sans hésiter, Hercule l'interpella :
+- Charon ! prends-moi dans ta barque ! Je dois aller voir le dieu des Enfers.
+- Impossible, tu es vivant.…
+- Je suis Hercule. Et si tu ne m'obéis pas...
+Le héros agita sa massue d'un air si menaçant que Charon, terrorisé, lui fit traverser le Styx. Autour d'Hercule, les Ombres des morts tourbillonnaient, mais dès qu'il tendait la main vers elles, elles s'enfuyaient. Heureusement Proserpine, souriante, vint à sa rencontre et l'accueillit comme un frère. Elle le conduisit jusqu'au trône de Pluton, auquel Cerbère était attaché par une grosse chaîne. Dès qu'il vit le visiteur, le chien se lança sur lui en aboyant, il essaya même de le mordre, mais ses crocs glissèrent sur la peau de lion qui protégeait le héros.
+Pluton le regardait d'un air sévère :
+- Hercule! Pourquoi es-tu ici ? Tonna la voix de Pluton.
+- Mais je... Cerbère... je... balbutia Hercule, pour une fois intimidé. Je dois ramener Cerbère à Eurysthée.
+- Emmène Cerbère si tu veux. Mais à une condition : pour le capturer tu ne devras utiliser ni ton arc, ni ta massue.
+Hercule déposa aussitôt ses armes, regarda le chien, ses trois têtes, et soudain bondit sur la bête. Il porta ses mains autour du cou de la bête et serra si fort que le chien, à demi étouffé, céda. Hercule attendit un moment pour être sûr d'avoir bien maîtrisé Cerbère, il reprit ses armes, salua Pluton et Proserpine, et s'en alla, traînant derrière lui par sa chaîne le gardien des Enfers.
+Quand Eurysthée vit le monstre aux trois têtes suivre Hercule, comme un bon chien suit son maître, il s'étonna. Mais si Cerbère était docile avec celui qui l'avait dompté, envers le reste des humains il manifestait son caractère infernal, aboyait, montrait les crocs, mordait chaque fois qu'il pouvait.
+Si bien qu'Eurysthée demanda à Hercule, pour le bien de l'humanité, d'aller rendre Cerbère aux Enfers. Et le bon Hercule accepta.
+Ainsi Hercule avait accompli les douze travaux qu'Eurysthée lui avait imposés. Il était libre enfin, célèbre, aimé et honoré de tous. Mais il courut encore bien des dangers et connut bien des aventures.</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:3};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+  })();
+  </script>
+</body>
+</html>
