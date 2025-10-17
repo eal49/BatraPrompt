@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:65px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">
+
+« Cet Hercule a vraiment trop de chance ! Dit Eurysthée. Je vais l’envoyer chercher le troupeau de Géryon pour offrir à Junon ces bêtes au pelage rouge. »
+Mais cette fois, il pourrait mourir car Géryon est un roi affreux. C’était un géant avec trois bustes, six bras et trois têtes, il vivait sur une île lointaine. Hercule voyagea longtemps jusqu’au détroit de Gibraltar, cherchant une embarcation. Aveuglé par le soleil brûlant, il lui décocha une flèche.
+« Qui ose m’attaquer ? » gronda le Soleil.
+« Excuse-moi, dieu du jour, répondit Hercule. Tes rayons m’empêchent de voir un bateau. Je dois aller vaincre Géryon. »
+Le Soleil éclata de rire. « Vaincre Géryon ? Il faut être fou… Mais je vais t’aider, j’aime les audacieux. »
+Le Soleil offrit à Hercule un disque d’or qui flottait parfaitement sur l’eau, comme un nénuphar. Hercule embarqua, mais l’Océan, furieux, tenta de le faire chavirer. Il le menaça de son arc, et l’eau se calma. Arrivé sur l’île, il vit le troupeau qui paissait. Bientôt, Géryon apparut, haut comme une montagne. D’une flèche, Hercule transperça ses trois cœurs et s’empara des bêtes.
+Commença alors un long retour vers la Grèce. Après avoir franchi le Rhône, en Ligurie, deux hommes volèrent quelques vaches. Hercule les assomma, mais les Liguriens, innombrables, l’attaquèrent. À court de flèches et chercha des gros cailloux au sol pour les attaquer avec mais il n’y en avait pas. Il sentit les larmes lui monter aux yeux. Jupiter, ému, fit tomber une pluie de cailloux, dispersant l’ennemi.
+Enfin, après avoir franchi les Alpes, Hercule rentra en Grèce. Eurysthée offrit alors à Junon les magnifiques bêtes au poil rouge, conquises au prix de tant d’épreuves.</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:2};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+  })();
+  </script>
+</body>
+</html>
