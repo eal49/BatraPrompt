@@ -53,7 +53,7 @@ Les verriers racontèrent que certains matins, leurs fours étaient chauds, et P
     const start=document.getElementById('start');
     const pause=document.getElementById('pause');
     const reset=document.getElementById('reset');
-    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:2.2};
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:0.8};
     function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
     function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
     function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}

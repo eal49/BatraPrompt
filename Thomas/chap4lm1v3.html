@@ -10,7 +10,7 @@
     *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
     .stage{position:fixed;inset:0;background:var(--panel)}
     .viewport{position:absolute;inset:0;overflow:hidden}
-    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:0;transition:opacity .2s}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
     .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
     .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
     .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
@@ -25,7 +25,6 @@
       <div class="mask top"></div>
       <div class="mask bottom"></div>
       <div class="prompt"><div class="content" id="c">
-
 
 Pietro était influent et il ordonna que Giacomo soit arrêté sur-le-champ.
 « Il nous conduira jusqu’au mystérieux verrier ! » dit-il.
@@ -54,7 +53,7 @@ Les verriers racontèrent que certains matins, leurs fours étaient chauds, et P
     const start=document.getElementById('start');
     const pause=document.getElementById('pause');
     const reset=document.getElementById('reset');
-    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.8};
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.9};
     function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
     function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
     function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
