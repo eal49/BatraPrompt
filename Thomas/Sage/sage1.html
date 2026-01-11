@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:65px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">
+
+Un vieux sage avait un fils qui ne voulait pas sortir de sa
+maison, car il était complexé par son physique. Il craignait que l’on se moque de lui. Son père lui expliqua alors qu’il ne fallait jamais écouter les gens et qu’il allait lui en donner la preuve.
+— Demain, lui dit-il, tu viendras avec moi au marché ! 
+Tôt de bon matin, ils quittèrent la maison, le vieux sage sur le dos de l’âne et son fils marchant à ses côtés. Quand ils arrivèrent sur la place, des marchands ne purent s’empêcher de murmurer :
+— Regardez cet homme. Il n’a aucune pitié ! Il se repose sur le dos de l’âne et laisse son pauvre fils à pied.
+Le sage dit à son fils :
+— Tu as bien entendu ? Demain, tu viendras avec moi au marché !
+
+Le deuxième jour, le sage et son fils firent le contraire : le garçon monta sur le dos de l’âne et le vieil homme marcha à ses côtés. À l’entrée de la place, les mêmes marchands étaient là :
+— Regardez cet enfant qui n’a aucune éducation, dirent-ils. Il est tranquille sur le dos de l’âne, alors que son pauvre père doit se traîner dans la poussière ! Si ce n’est pas malheureux de voir un tel spectacle !
+— Tu as bien entendu ? dit le père à son fils. Demain, tu viendras avec moi au marché !
+Le troisième jour, ils partirent à pied en tirant l’âne derrière eux au bout d’une
+corde.
+— Regardez ces deux imbéciles, se moquèrent les marchands. Ils marchent à pied comme s’ils ne savaient pas que les ânes sont faits pour être montés.
+— Tu as bien entendu ? Demain, tu viendras avec moi au marché !
+Le quatrième jour, lorsqu’ils quittèrent la maison, ils étaient tous les deux juchés sur le dos de l’âne. À l’entrée de la place, les marchands laissèrent éclater leur indignation :
+— Quelle honte ! Regardez ces deux-là ! Ils n’ont aucune pitié pour cette pauvre bête.
+Le cinquième jour, ils arrivèrent au marché en portant l’âne sur leurs
+épaules. Mais les marchands éclatèrent de rire :
+— Regardez ces deux fous qui portent leur âne au lieu de le monter !
+Aussi le sage conclut-il :
+— Mon fils, tu as bien entendu, quoi que tu fasses dans la vie, les gens trouvent toujours à critiquer. C’est pourquoi tu ne dois pas te soucier de leurs opinions : fais ce que bon te semble et passe ton chemin. »</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:2.2};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+  })();
+  </script>
+</body>
+</html>
