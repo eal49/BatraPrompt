@@ -26,20 +26,19 @@
       <div class="mask bottom"></div>
       <div class="prompt"><div class="content" id="c">La trêve de Noël 
 
-Je t’écris dans une bien meilleure disposition d’esprit, car il vient de se passer quelque chose de merveilleux. Hier matin, jour de Noël, nous étions dans nos tranchées. Il faisait très froid, mais tout était calme et lumineux. C’était l’une des plus belles matinées que j’aie jamais vues.
-Tout à coup, l’un de nos soldats remarqua un drapeau blanc agité au-dessus de la tranchée allemande, sur le remblai. Des voix crièrent à travers le no man’s land:
+Je t’écris dans une bien meilleure disposition d’esprit. Hier matin, jour de Noël, nous étions dans nos tranchées. Il faisait très froid, mais tout était calme et lumineux.
+Soudain, un drapeau blanc apparut sur le remblai allemand. Des voix crièrent à travers le no man’s land :
 -	Joyeux Noël, Tommy ! Joyeux Noël!
 Nous répondîmes :
 -	À toi aussi, Fritz ! À toi aussi !
-Nous pensions que cela s’arrêterait là. Mais un Allemand apparut sur le parapet, tenant un drapeau blanc.
--	Ne tirez pas ! cria quelqu’un.
-Personne ne tira. D’autres soldats allemands sortirent. Je dis alors :
--	Baissez la tête ! C’est un subterfuge.
-Mais ce n’en était pas un. L’un d’eux agitait une bouteille.
--	C’est Noël, Tommy. Nous avons du schnaps. Des saucisses. Est-ce que nous nous rencontrons ? Oui?
-Ils avançaient nombreux dans le no man’s land, sans fusils, vêtus de capotes grises. De notre côté, le jeune Morris sortit le premier :
--	Allez, les gars! Qu’est-ce que vous attendez ?
-Alors tous suivirent. J’étais l’un des gradés et j’aurais dû arrêter cela, mais je ne l’ai pas fait. Je marchais avec eux, simplement, à la rencontre d’autres hommes.
+Un Allemand monta sur le parapet avec un drapeau blanc.
+-	Ne tirez pas !
+Je pensai à un subterfuge, mais ce n’en était pas un.
+-	C’est Noël, Tommy. Nous avons du schnaps.
+Ils avançaient sans armes, en capotes grises. Le jeune Morris sortit :
+-	Allez, les gars!
+J’étais l’un des gradés, mais je n’ai rien arrêté. J’ai avancé avec eux.
+
 </div></div>
     </div>
   </div>
@@ -55,7 +54,7 @@ Alors tous suivirent. J’étais l’un des gradés et j’aurais dû arrêter c
     const start=document.getElementById('start');
     const pause=document.getElementById('pause');
     const reset=document.getElementById('reset');
-    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.4};
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.1};
     function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
     function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
     function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}

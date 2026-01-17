@@ -14,7 +14,7 @@
     .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
     .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
     .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
-    .content{max-width:900px;line-height:1.6;font-size:62px;white-space:pre-wrap;will-change:transform}
+    .content{max-width:900px;line-height:1.6;font-size:60px;white-space:pre-wrap;will-change:transform}
     .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
     .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
   </style>
@@ -26,20 +26,19 @@
       <div class="mask bottom"></div>
       <div class="prompt"><div class="content" id="c">La trêve de Noël 
 
-Je t’écris dans une bien meilleure disposition d’esprit, car il vient de se passer quelque chose de merveilleux. Hier matin, jour de Noël, nous étions dans nos tranchées. Il faisait très froid, mais tout était calme et lumineux. C’était l’une des plus belles matinées que j’aie jamais vues.
-Tout à coup, l’un de nos soldats remarqua un drapeau blanc agité au-dessus de la tranchée allemande, sur le remblai. Des voix crièrent à travers le no man’s land:
+Je t’écris dans une bien meilleure disposition d’esprit. Hier matin, jour de Noël, nous étions dans nos tranchées. Il faisait très froid, mais tout était calme et lumineux.
+Soudain, un drapeau blanc apparut sur le remblai allemand. Des voix crièrent à travers le no man’s land :
 -	Joyeux Noël, Tommy ! Joyeux Noël!
 Nous répondîmes :
 -	À toi aussi, Fritz ! À toi aussi !
-Nous pensions que cela s’arrêterait là. Mais un Allemand apparut sur le parapet, tenant un drapeau blanc.
--	Ne tirez pas ! cria quelqu’un.
-Personne ne tira. D’autres soldats allemands sortirent. Je dis alors :
--	Baissez la tête ! C’est un subterfuge.
-Mais ce n’en était pas un. L’un d’eux agitait une bouteille.
--	C’est Noël, Tommy. Nous avons du schnaps. Des saucisses. Est-ce que nous nous rencontrons ? Oui?
-Ils avançaient nombreux dans le no man’s land, sans fusils, vêtus de capotes grises. De notre côté, le jeune Morris sortit le premier :
--	Allez, les gars! Qu’est-ce que vous attendez ?
-Alors tous suivirent. J’étais l’un des gradés et j’aurais dû arrêter cela, mais je ne l’ai pas fait. Je marchais avec eux, simplement, à la rencontre d’autres hommes.
+Un Allemand monta sur le parapet avec un drapeau blanc.
+-	Ne tirez pas !
+Je pensai à un subterfuge, mais ce n’en était pas un.
+-	C’est Noël, Tommy. Nous avons du schnaps.
+Ils avançaient sans armes, en capotes grises. Le jeune Morris sortit :
+-	Allez, les gars!
+J’étais l’un des gradés, mais je n’ai rien arrêté. J’ai avancé avec eux.
+
 </div></div>
     </div>
   </div>
@@ -55,7 +54,7 @@ Alors tous suivirent. J’étais l’un des gradés et j’aurais dû arrêter c
     const start=document.getElementById('start');
     const pause=document.getElementById('pause');
     const reset=document.getElementById('reset');
-    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:0.9};
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:0.7};
     function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
     function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
     function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
