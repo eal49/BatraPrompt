@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:62px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">La trêve de Noël (2)
+
+En pleine guerre, nous faisions la paix. Ma chère Connie, tu ne peux imaginer ce que j’ai ressenti lorsque j’ai croisé le regard de l’officier allemand qui s’avançait vers moi, la main tendue, au milieu du no man’s land.
+-	Hans Wolf, dit-il en me serrant la main. Je viens de Dusseldorf. Je joue du violoncelle. Joyeux Noël !
+-	Capitaine Jim Macpherson, répondis-je. Joyeux Noël à vous aussi. Je suis maître d’école dans le Dorset, à l’ouest de l’Angleterre.
+-	Ah, le Dorset ! s’exclama-t-il avec un sourire. Je connais très bien.
+Nous partageâmes ma ration de rhum et son excellente saucisse, puis nous bavardâmes longuement. Hans parlait un anglais presque parfait, appris dans les livres, sans avoir jamais mis les pieds en Angleterre. Il me confia qu’il était marié et père d’un bébé de six mois.
+Autour de nous, des soldats fumaient, riaient, mangeaient et buvaient. J’offris à Hans un morceau de ton gâteau de Noël, Connie. Il trouva ta pâte d’amandes délicieuse. À cet instant, il était difficile de croire que cet homme était mon ennemi.
+Quelqu’un sortit alors un ballon. On empila des capotes pour former les buts et un match de football commença entre Anglais et Allemands. Hans et moi regardions le jeu avec enthousiasme, frappant des mains pour nous réchauffer.
+-	Jim Macpherson, dit-il soudain, voilà comment nous devrions régler cette guerre : par un match de football. Aucun enfant ne devient orphelin, aucune femme veuve.
+-	Oui, même si je préférerais que ce soit au cricket, répondis-je.
+Nous rîmes ensemble, jusqu’à la fin du match, gagné par les Allemands. Puis le schnaps et les rations s’épuisèrent, et nous savions que ce moment de paix touchait à sa fin.
+
+</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.1};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+  })();
+  </script>
+</body>
+</html>
