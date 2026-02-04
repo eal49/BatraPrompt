@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:65px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">
+
+Ali Baba lui avoua tout. 
+«Mais si nous faisons attention, les voleurs ne sauront jamais que leur secret a été découvert, et nous vivrons confortablement pour le restant de nos jours ». Cependant, Kassim était bien décidé à s’enrichir au maximum. Le lendemain matin, il se mit en route pour la grotte avec vingt ânes, chargés chacun de deux paniers vides.
+Quand il fut face au rocher, il cria de toutes ses forces : « Sésame, ouvre-toi ! » et le rocher s’ouvrit. Kassim ne put en croire ses yeux quand il vit toutes ces richesses. Il cria à la porte : « Sésame, ferme-toi ! », de façon à ne pas être dérangé, et commença à rassembler de gros tas pour les emporter. « Vingt ânes ? Ha ha ha ! Il me faudrait cent ânes » pensa Kassim. Quand il eut fini de remplir ses quarante paniers, il fut soudain saisi de terreur : il avait oublié la formule qui permettait de rouvrir la porte. « Orge, ouvre-toi ! » essaya-t-il. « Froment, ouvre-toi ! ». La porte restait fermée. Alors Kassim commença à trembler de la tête aux pieds, car il entendait, à l’extérieur, des bruits de sabots.
+Les voleurs étaient de retour ! « Sésame, ouvre-toi » rugit une terrible voix. La porte s’ouvrit, et Kassim se trouva face au chef des brigands, avec son sabre étincelant à la main et sa bande de voleurs derrière lui. Ils éclatèrent de rire à la vue de ce cambrioleur et ils le taillèrent aussitôt en six morceaux… Puis ils vidèrent les paniers et s’assurèrent qu’il ne manquait rien d’autre dans la grotte.
+Bien sûr, ils ne remarquèrent pas les quelques pièces d’or qu’Ali Baba avait prises, et furent rassurer que seul Kassim connaissait le secret de leur caverne. Ils partirent aussi rapidement qu’ils étaient arrivés, mais ils laissèrent le corps de Kassim comme avertissement, au cas où un autre fou serait tenté de voler leur trésor. Pendant ce temps, la femme de Kassim attendait à la maison, se voyant déjà porter de fabuleux colliers et des bagues magnifiques que son mari lui avait promis. Mais le soir venu, elle pensa qu’il était peut-être arrivé quelque chose. Aussi, elle se rendit chez Ali Baba et lui demanda d’aller chercher son frère.</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.3};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+  })();
+  </script>
+</body>
+</html>
