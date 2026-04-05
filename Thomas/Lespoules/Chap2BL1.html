@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:65px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">
+
+Jusque-là, donc, c’était un jour comme un autre. Soudain, une petite tête noire se faufila par un trou de la porte. Deux petits yeux brillants regardèrent le poulailler avec curiosité. C’était un choucas. II décida d’entrer. Les choucas sont des fouineurs, et ils ont tendance à chaparder. Le choucas remonta l’allée centrale en sautillant, vérifia qu'il n’y avait rien d’intéressant à ramasser, puis il rebroussa chemin en poussant un petit «pff! » méprisant, et s’apprêta à ressortir.
+— Regarde un peu ce pauvre poulet ! s’exclama Flossie.
+— Je suis un choucas, rectifia le choucas.
+— Bonjour mon chou, dit Flossie.
+Comme tu es maigre! Tu ne trouves pas, Bessie ?
+— En effet, acquiesça Bessie.Tu devrais prendre soin de toi, mon chou. Est-ce que tu as pris un bon petit déjeuner ?
+— À te voir, on jurerait que tu ne déjeunes jamais, enchaîna Flossie. Allez, viens manger quelques graines avec nous, ça te fera du bien.
+Touché de leur gentillesse, le choucas se pencha au-dessus du tapis roulant où défilaient les graines nauséabonds. Aussitôt il recula en se plaquant l’aile sur le bec.
+— Je vous remercie, mais j'étais justement sur le point d’aller chercher quelque chose à manger. Maintenant, si vous voulez bien m'excuser, il faut que j’y aille.
+— Chercher quelque chose à manger ? s’étonna Flossie.
+Mais, au moment de partir, le choucas vit étinceler un bouton de métal doré sur la porte de la cage. Or les choucas sont incapables de résister à tout ce qui brille. « Les poules n’ont certainement rien à faire de ce joli bouton, se dit-il. Si je le prenais ? »
+Sur ce, il donna un bon coup de bec dessus mais, à sa grande surprise, le bouton ne bougea pas. Il fit une deuxième tentative, puis une autre, et soudain le bouton sauta et la porte de la cage s’ouvrit ! Complètement affolées, Aggie et Maggie se réfugièrent immédiatement au fond de la cage. Flossie et Bessie, quant à elles, demeurèrent immobiles, roulant de grands yeux. C’est alors que le choucas eut une idée…</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:2};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+  })();
+  </script>
+</body>
+</html>
