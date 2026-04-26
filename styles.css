@@ -152,6 +152,9 @@ input[type="range"] { accent-color: var(--accent); }
 .landing__title { font-size: 42px; margin: 0; }
 .landing__subtitle { color: var(--muted); margin: 8px 0 16px; }
 .landing__actions { display: flex; gap: 12px; justify-content: center; }
-.landing__list { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.landing__list { padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+.landing__group { }
+.landing__group-title { color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 10px; }
+.landing__group-files { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .landing__item { display: block; background: var(--panel); border: 1px solid var(--border); padding: 12px; border-radius: 8px; color: var(--text); text-decoration: none; }
 .landing__empty { color: var(--muted); text-align: center; }

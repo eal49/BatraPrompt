@@ -29,47 +29,36 @@
         const list = document.getElementById('landingList');
         const browseBtn = document.getElementById('browseBtn');
 
-        function ownerRepoFromUrl(){
-            // Works for user or project pages: https://<user>.github.io/<repo>/
-            const host = location.host; // <user>.github.io
-            const user = host.split('.')[0];
-            const pathParts = location.pathname.split('/').filter(Boolean);
-            const repo = pathParts[0] || '';
-            return { user, repo };
-        }
-
-        async function fetchHtmlFiles(){
-            const { user, repo } = ownerRepoFromUrl();
-            if (!user) return [];
+        async function fetchManifest(){
             try {
-                const api = repo
-                    ? `https://api.github.com/repos/${user}/${repo}/contents/`
-                    : `https://api.github.com/repos/${user}/${user}.github.io/contents/`;
-                const resp = await fetch(api);
-                if (!resp.ok) return [];
-                const data = await resp.json();
-                return (Array.isArray(data) ? data : [])
-                    .filter(it => /\.html$/i.test(it.name) && it.name !== 'index.html' && it.name !== 'generator.html')
-                    .map(it => ({ name: it.name, path: it.path }));
-            } catch { return []; }
+                const resp = await fetch('./files.json');
+                if (!resp.ok) return {};
+                return await resp.json();
+            } catch { return {}; }
         }
 
-        function render(files){
+        function render(manifest){
             if (!list) return;
-            if (!files.length){
+            const users = Object.entries(manifest).filter(([, files]) => files.length > 0);
+            if (!users.length){
                 list.innerHTML = '<p class="landing__empty">No generated pages found.</p>';
                 return;
             }
-            list.innerHTML = files.map(f => `<a class=\"landing__item\" href=\"${encodeURI(f.name)}\">${f.name}</a>`).join('');
+            list.innerHTML = users.map(([user, files]) => `
+                <section class="landing__group">
+                    <h2 class="landing__group-title">${user}</h2>
+                    <div class="landing__group-files">
+                        ${files.map(f => `<a class="landing__item" href="${encodeURI(user)}/${encodeURI(f)}">${f}</a>`).join('')}
+                    </div>
+                </section>`).join('');
         }
 
         async function browse(){
-            const files = await fetchHtmlFiles();
-            render(files);
+            const manifest = await fetchManifest();
+            render(manifest);
         }
 
         if (browseBtn) browseBtn.addEventListener('click', (e)=>{ e.preventDefault(); browse(); });
-        // Auto-browse on load
         browse();
     })();
     </script>

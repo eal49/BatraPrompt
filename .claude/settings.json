@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "Bash(gh api *)",
+      "Bash(openspec init *)",
+      "Bash(openspec list *)",
+      "Bash(openspec new *)",
+      "Bash(openspec status *)",
+      "Bash(openspec instructions *)",
+      "Bash(node .github/scripts/generate-manifest.js)",
+      "Bash(git add *)"
+    ]
+  }
+}
