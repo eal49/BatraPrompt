@@ -26,12 +26,19 @@
       <div class="mask bottom"></div>
       <div class="prompt"><div class="content" id="c">
 
-Tous les enfants voulaient les rêves de Zorzi. 
-Tous les soirs, Giacomo et Zorzi se retrouvaient pour dîner dans un endroit secret. Puis, une fois la nuit tombée, Zorzi se faufilait dans un atelier pour souffler les rêves que les enfants lui commandés et le vent les envoyait dans leur chambre.
-Très vite, Zorzi eu une grande renommée. Les gens désertèrent les magasins des autres maîtres verriers. Leurs affaires étaient menacées, les verriers essayèrent de souffler le verre aussi bien mais ils ne réussissaient pas.
-« Si nous ne faisons rien nous serons ruinés ! dirent certains maîtres verriers.
-- Mais nous ne savons pas qui est ce souffleur, dirent d’autres maîtres verriers.
-- Demandons conseil à Pietro !</div></div>
+Pietro était influent et il ordonna que Giacomo soit arrêté sur-le-champ.
+« Il nous conduira jusqu’au mystérieux verrier ! » dit-il.
+Giacomo expliqua qu’il ne savait pas où il travaillait.
+« Je ne l’ai accompagné qu’une seule fois, et il faisait trop noir cette nuit-là », répondit-il.
+« Tu es le seul à connaître cet homme ! Il n’y a pas un détail qui nous permettrait de le reconnaître ? » insista Pietro.
+« Non… », mentit Giacomo.
+« Quel dommage, cette information t’aurait permis d’être libre. Qu’on le jette au cachot ! » déclara Pietro.
+« Attendez ! Il boite un peu ! » s’écria Giacomo.
+Devant ses geôliers, il se leva et il claudiqua pour imiter Zorzi.
+« Le danseur ! » s’exclamèrent les maîtres verriers.
+« Fouillez toute l’île et retrouvez ce souffleur ! » hurla Pietro.
+Après des jours de recherche, Zorzi était introuvable.
+Les verriers racontèrent que certains matins, leurs fours étaient chauds, et Pietro dit : « C’est dans nos ateliers qu’il va souffler ses rêves, nous l’attraperons ! »</div></div>
     </div>
   </div>
   <div class="ui">
@@ -46,7 +53,7 @@ Très vite, Zorzi eu une grande renommée. Les gens désertèrent les magasins d
     const start=document.getElementById('start');
     const pause=document.getElementById('pause');
     const reset=document.getElementById('reset');
-    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.7};
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.6};
     function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
     function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
     function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}

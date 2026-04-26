@@ -15,7 +15,8 @@
       "Bash(git pull *)",
       "Bash(git commit *)",
       "Bash(node -e ' *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(git checkout *)"
     ]
   }
 }
