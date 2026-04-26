@@ -224,6 +224,11 @@
     <button class="btn" id="start">Start</button>
     <button class="btn" id="pause">Pause</button>
     <button class="btn" id="reset">Reset</button>
+    <button class="btn" id="qrbtn">QR</button>
+  </div>
+  <div id="qrmodal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+    <img id="qrimg" width="220" height="220" style="border-radius:8px;background:#fff;padding:8px" alt="QR code" />
+    <span id="qrurl" style="color:#a8acb8;font-size:11px;max-width:300px;text-align:center;word-break:break-all"></span>
   </div>
   <script>
   (function(){
@@ -243,7 +248,13 @@
     function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
     function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
     start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
-    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } });
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } else if(e.key==='Escape'){ qrmodal.style.display='none'; } });
+    const qrbtn=document.getElementById('qrbtn');
+    const qrmodal=document.getElementById('qrmodal');
+    const qrimg=document.getElementById('qrimg');
+    const qrurl=document.getElementById('qrurl');
+    qrbtn.addEventListener('click',function(){ const u=window.location.href; qrimg.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(u); qrurl.textContent=u; qrmodal.style.display='flex'; });
+    qrmodal.addEventListener('click',function(e){ if(e.target===qrmodal) qrmodal.style.display='none'; });
   })();
   </script>
 </body>
