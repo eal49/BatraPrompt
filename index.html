@@ -45,12 +45,15 @@
                 return;
             }
             list.innerHTML = users.map(([user, files]) => `
-                <section class="landing__group">
-                    <h2 class="landing__group-title">${user}</h2>
-                    <div class="landing__group-files">
-                        ${files.map(f => `<a class="landing__item" href="${encodeURI(user)}/${encodeURI(f)}">${f}</a>`).join('')}
+                <details class="landing__group" open>
+                    <summary class="landing__group-title">
+                        <span class="landing__group-name">${user}</span>
+                        <span class="landing__group-count">${files.length} file${files.length !== 1 ? 's' : ''}</span>
+                    </summary>
+                    <div class="landing__tree">
+                        ${files.map(f => `<a class="landing__row" href="${encodeURI(user)}/${encodeURI(f)}">${f.replace(/\.html$/i, '')}</a>`).join('')}
                     </div>
-                </section>`).join('');
+                </details>`).join('');
         }
 
         async function browse(){
