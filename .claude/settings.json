@@ -9,7 +9,11 @@
       "Bash(openspec status *)",
       "Bash(openspec instructions *)",
       "Bash(node .github/scripts/generate-manifest.js)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git commit *)"
     ]
   }
 }
