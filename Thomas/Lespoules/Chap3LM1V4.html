@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:65px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">
+
+Une fois dehors, les deux sœurs restèrent clouées sur place, l’une contre l’autre pour se rassurer.
+— Il fait froid ici, remarqua Bessie. On ferait peut-être mieux de rentrer tout de suite.
+— Il ne fait pas si froid que ça, voyons! dit le choucas d’une voix encourageante. C’est parce que vous sortez d’un poulailler surchauffée, voilà tout. Il fera  meilleur quand le soleil se lèvera.
+Mais cela ne voulait pas dire grand-chose pour Bessie. Elle attendit que le choucas se fût un peu éloigné pour chuchoter à Flossie :
+— Il est très gentil mais je crois qu’il est un peu simplet.
+— Suivez-moi, je vais essayer de trouver quelque chose à nous mettre sous le bec, leur cria le choucas.
+Les deux poules se mirent à avancer tout doucement entre les énormes camions garés sur le grand parking qui entourait le poulailler.
+— Dépêchez-vous, quelqu'un pourrait vous voir ! lança le choucas.
+— On ne peut pas faire plus vite, protesta Flossie, il n’y a rien pour se retenir !
+Les deux poules étaient tellement habituées à s’agripper au grillage de leur cage qu’elles se sentaient très mal à l’aise sur la terre ferme.
+— Vous n’avez pas besoin de vous accrocher au sol, leur expliqua le choucas. Vous ne pouvez pas tomber !
+— Pense un peu aux pauvres pattes de Flossie !
+— Pourquoi ne pas aller barboter dans cette flaque d’eau ? suggéra le choucas. Je suis sûr que cela vous ferait le plus grand bien.
+— C’est incroyable, Bessie ! s’exclama Flossie en s’approchant prudemment de la flaque. 
+Après avoir pataugé un bon moment dans la flaque d’eau, les deux sœurs trouvèrent que c'était effectivement un excellent remède pour soulager leurs pattes enflées. « Après tout, pensèrent-elles, ce choucas n’est peut-être pas aussi bête qu’il en a l'air... »</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+    <button class="btn" id="qrbtn">QR</button>
+  </div>
+  <div id="qrmodal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+    <img id="qrimg" width="220" height="220" style="border-radius:8px;background:#fff;padding:8px" alt="QR code" />
+    <span id="qrurl" style="color:#a8acb8;font-size:11px;max-width:300px;text-align:center;word-break:break-all"></span>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:2.8};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } else if(e.key==='Escape'){ qrmodal.style.display='none'; } });
+    const qrbtn=document.getElementById('qrbtn');
+    const qrmodal=document.getElementById('qrmodal');
+    const qrimg=document.getElementById('qrimg');
+    const qrurl=document.getElementById('qrurl');
+    qrbtn.addEventListener('click',function(){ const u=window.location.href; qrimg.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(u); qrurl.textContent=u; qrmodal.style.display='flex'; });
+    qrmodal.addEventListener('click',function(e){ if(e.target===qrmodal) qrmodal.style.display='none'; });
+  })();
+  </script>
+</body>
+</html>
