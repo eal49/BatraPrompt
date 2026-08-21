@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teleprompter</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{--bg:#0b0b0c;--panel:#141416;--text:#eaeaf0;--muted:#a8acb8;--border:#23242a}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+    .stage{position:fixed;inset:0;background:var(--panel)}
+    .viewport{position:absolute;inset:0;overflow:hidden}
+    .mask{position:absolute;left:0;right:0;height:18%;pointer-events:none;z-index:2;opacity:1;transition:opacity .2s}
+    .mask.top{top:0;background:linear-gradient(180deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .mask.bottom{bottom:0;background:linear-gradient(0deg,rgba(11,11,12,.95),rgba(11,11,12,0))}
+    .prompt{position:absolute;inset:0;padding:48px 24px;display:flex;justify-content:center;align-items:flex-start}
+    .content{max-width:900px;line-height:1.6;font-size:65px;white-space:pre-wrap;will-change:transform}
+    .ui{position:fixed;left:12px;bottom:12px;color:var(--muted);font-size:12px}
+    .btn{appearance:none;border:1px solid var(--border);background:#1a1b1f;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer;margin-right:6px}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="viewport" id="v">
+      <div class="mask top"></div>
+      <div class="mask bottom"></div>
+      <div class="prompt"><div class="content" id="c">Alice découvrit soudain un guéridon sur lequel était posée une minuscule clé dorée. Elle aperçut une petite porte de quarante centimètres de haut. Elle essaya la petite clé qui, à sa grande joie, allait parfaitement dans la serrure. Alice ouvrit la porte qui donnait sur un couloir étroit. Au bout, elle aperçut un jardin ravissant. Mais, elle ne pouvait même pas passer sa tête par la porte minuscule. Elle retourna au guéridon et vit une bouteille portant à son goulot une étiquette avec ces mots, magnifiquement imprimés en grosses lettres :
+« Bois-moi »
+Alice goûta le liquide et elle trouva cela très bon (ça avait goût de tarte aux cerises, de crème chantilly, d’ananas, de poulet rôti, de caramel et de pain grillé au beurre) et elle eut bientôt tout avalé.
+« Quelle curieuse
+sensation !
+s’étonna Alice,
+on dirait que
+je rétrécis ! »
+
+C’était bien ce qui était arrivé : Alice ne mesurait plus que vingt-cinq centimètres. Elle se dirigea vers la petite porte mais la pauvre Alice se rendit compte qu’elle avait oublié la petite clé dorée sur le table ! Elle était maintenant trop petite pour l’attraper ! Le guéridon était trop haut ! La pauvre enfant essaya de grimper le long du pied de la table mais elle s’épuisa. Elle s’assit par terre et se mit à pleurer.
+Soudain, elle remarqua une petite boîte sous le guéridon, elle l’ouvrit et y trouva un tout petit gâteau, sur lequel était posée une étiquette avec les mots :
+« Mange-moi »
+Elle croqua une petite bouchée, sa taille ne changea pas. Alors, elle termina le gâteau à toute vitesse… En quelques instants, Alice grandit de plusieurs mètres. Elle était si grande, qu’elle avait du mal à voir ses pieds lorsqu’elle regardait le sol. Sa tête heurta le plafond, elle prit aussitôt la petite clé dorée et alla ouvrir la petite porte du jardin. Mais, elle n’avait aucun espoir d’y pénétrer. Elle s’assit et se mit à pleurer. Des larmes énormes, sans s’arrêter, versant des litres de larmes, jusqu’à ce que se formât autour d’elle une immense mare de larmes, comme un océan.
+A ce moment-là, le lapin revint avec un grand éventail dans la main, il répétait « Oh, la, la, la reine ! La reine ! Elle me fera couper la tête, je suis en retard. » Le lapin s’approcha d’elle et elle dit d’une petite voix timide : « S’il vous plaît, monsieur... » Le lapin sursauta, laissa tomber son éventail et s’enfuit. Alice ramassa l’éventail et rapetissa immédiatement, rapidement… elle lâcha vite l’éventail avant de disparaître complètement en devenant minuscule. Elle était obligée de nager dans la mare de larmes qu’elle avait formée lorsqu’elle était gigantesque. Le courant l’emporta vers la porte qui menait au jardin, Alice était si petite qu’elle passa à travers la serrure de la porte.
+ 
+</div></div>
+    </div>
+  </div>
+  <div class="ui">
+    <button class="btn" id="start">Start</button>
+    <button class="btn" id="pause">Pause</button>
+    <button class="btn" id="reset">Reset</button>
+    <button class="btn" id="qrbtn">QR</button>
+  </div>
+  <div id="qrmodal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+    <img id="qrimg" width="220" height="220" style="border-radius:8px;background:#fff;padding:8px" alt="QR code" />
+    <span id="qrurl" style="color:#a8acb8;font-size:11px;max-width:300px;text-align:center;word-break:break-all"></span>
+  </div>
+  <script>
+  (function(){
+    const v=document.getElementById('v');
+    const c=document.getElementById('c');
+    const start=document.getElementById('start');
+    const pause=document.getElementById('pause');
+    const reset=document.getElementById('reset');
+    const state={running:false,paused:false,offset:0,ts:0,raf:0,wordsPerSec:1.4};
+    function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+    function h(){const s=getComputedStyle(c.parentElement);return Math.max(0,(c.offsetHeight+parseFloat(s.paddingTop)+parseFloat(s.paddingBottom))-v.clientHeight)}
+    function wc(t){t=(t||'').trim();return t? (t.match(/\S+/g)||[]).length:0}
+    function ppw(){const w=wc(c.textContent);const ht=c.offsetHeight;return (!w||!ht)?10:Math.max(1,ht/w)}
+    function apply(){c.style.transform='translateY('+-state.offset+'px)'}
+    function loop(ts){if(!state.running||state.paused) return; if(state.ts===0){state.ts=ts;state.raf=requestAnimationFrame(loop);return;} const dt=(ts-state.ts)/1000; state.ts=ts; state.offset=clamp(state.offset+state.wordsPerSec*ppw()*dt,0,h()); apply(); if(state.offset>=h()){state.running=false;return;} state.raf=requestAnimationFrame(loop)}
+    function startRun(){if(state.running) return; state.running=true; state.paused=false; state.offset=0; state.ts=0; apply(); state.raf=requestAnimationFrame(loop)}
+    function pauseResume(){ if(!state.running) return; state.paused=!state.paused; if(!state.paused){state.ts=0; state.raf=requestAnimationFrame(loop)} else {cancelAnimationFrame(state.raf); state.raf=0} }
+    function resetRun(){ state.running=false; state.paused=false; state.offset=0; state.ts=0; cancelAnimationFrame(state.raf); state.raf=0; apply() }
+    start.addEventListener('click',startRun); pause.addEventListener('click',pauseResume); reset.addEventListener('click',resetRun);
+    window.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); if(!state.running) startRun(); else pauseResume(); } else if((e.key||'').toLowerCase()==='r'){ resetRun(); } else if(e.key==='Escape'){ qrmodal.style.display='none'; } });
+    const qrbtn=document.getElementById('qrbtn');
+    const qrmodal=document.getElementById('qrmodal');
+    const qrimg=document.getElementById('qrimg');
+    const qrurl=document.getElementById('qrurl');
+    qrbtn.addEventListener('click',function(){ const u=window.location.href; qrimg.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(u); qrurl.textContent=u; qrmodal.style.display='flex'; });
+    qrmodal.addEventListener('click',function(e){ if(e.target===qrmodal) qrmodal.style.display='none'; });
+  })();
+  </script>
+</body>
+</html>
